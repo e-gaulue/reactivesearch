@@ -83,7 +83,9 @@ class GeoDistanceSlider extends GeoCode {
 	}
 
 	componentDidMount() {
-		this.autocompleteService = new window.google.maps.places.AutocompleteService();
+		if (this.props.autocomplete) {
+			this.autocompleteService = new window.google.maps.places.AutocompleteService();
+		}
 	}
 
 	componentDidUpdate(prevProps) {
@@ -269,7 +271,7 @@ class GeoDistanceSlider extends GeoCode {
 		} else if (onChange) {
 			onChange({ location: value, distance: this.state.currentDistance });
 		}
-		if (value.trim()) {
+		if (value.trim() && this.props.autocomplete) {
 			if (!this.autocompleteService) {
 				this.autocompleteService = new window.google.maps.places.AutocompleteService();
 			}
@@ -531,6 +533,7 @@ GeoDistanceSlider.propTypes = {
 	unit: types.string,
 	URLParams: types.bool,
 	serviceOptions: types.props,
+	autocomplete: types.bool,
 };
 
 GeoDistanceSlider.defaultProps = {
@@ -547,6 +550,7 @@ GeoDistanceSlider.defaultProps = {
 	autoLocation: true,
 	unit: 'mi',
 	countries: [],
+	autocomplete: true,
 };
 
 const mapStateToProps = (state, props) => ({

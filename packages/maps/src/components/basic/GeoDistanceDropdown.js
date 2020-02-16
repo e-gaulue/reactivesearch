@@ -40,7 +40,12 @@ class GeoDistanceDropdown extends GeoCode {
 		this.type = 'geo_distance';
 		this.coordinates = null;
 		this.autocompleteService = null;
-		this.geocoder = new window.google.maps.Geocoder();
+		
+		if (props.geocoder) {
+			this.geocoder = props.geocoder;
+		} else {
+			this.geocoder = new window.google.maps.Geocoder();
+		}
 
 		if (props.autoLocation) {
 			this.getUserLocation();
@@ -82,7 +87,9 @@ class GeoDistanceDropdown extends GeoCode {
 	}
 
 	componentDidMount() {
-		this.autocompleteService = new window.google.maps.places.AutocompleteService();
+		if (this.props.autocomplete) {
+			this.autocompleteService = new window.google.maps.places.AutocompleteService();
+		}
 	}
 
 	componentDidUpdate(prevProps) {
@@ -288,7 +295,7 @@ class GeoDistanceDropdown extends GeoCode {
 				label: this.props.value.label,
 			});
 		}
-		if (value.trim()) {
+		if (value.trim() && this.props.autocomplete) {
 			if (!this.autocompleteService) {
 				this.autocompleteService = new window.google.maps.places.AutocompleteService();
 			}
@@ -516,6 +523,8 @@ GeoDistanceDropdown.propTypes = {
 	unit: types.string,
 	URLParams: types.bool,
 	serviceOptions: types.props,
+	geocoder: types.object,
+	autocomplete: types.bool,
 };
 
 GeoDistanceDropdown.defaultProps = {
@@ -527,6 +536,7 @@ GeoDistanceDropdown.defaultProps = {
 	countries: [],
 	autoLocation: true,
 	unit: 'mi',
+	autocomplete: true,
 };
 
 const mapStateToProps = (state, props) => ({
