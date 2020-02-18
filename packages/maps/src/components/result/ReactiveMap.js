@@ -410,12 +410,28 @@ class ReactiveMap extends Component {
 		if (center && this.props.defaultRadius) {
 			// skips geo bounding box query on initial load
 			this.skipBoundingBox = true;
-			return {
+
+			const geoQuery = {
 				geo_distance: {
 					distance: `${this.props.defaultRadius}${this.props.unit}`,
 					[this.props.dataField]: this.getArrPosition(center),
 				},
 			};
+
+			if (this.defaultQuery) {
+				const { query } = this.defaultQuery;
+
+				if (query) {
+					// adds defaultQuery's query to geo-query
+					// to generate a map query
+
+					return {
+						must: [geoQuery, query],
+					};
+				}
+			}
+
+			return geoQuery;
 		}
 		return null;
 	};
