@@ -222,9 +222,10 @@ class ReactiveMap extends Component {
 			// we need to forceExecute the query because the center has changed
 			const forceExecute = true;
 
+			// we need to use getGeoDistanceQuery because new center can be outside the mappingbox
 			this.props.setMapData(
 				this.props.componentId,
-				this.getGeoQuery(this.props),
+				this.getGeoDistanceQuery(this.props),
 				persistMapQuery,
 				forceExecute,
 			);
@@ -311,6 +312,7 @@ class ReactiveMap extends Component {
 			|| this.props.error !== nextProps.error
 			|| this.props.streamAutoCenter !== nextProps.streamAutoCenter
 			|| this.props.defaultZoom !== nextProps.defaultZoom
+			|| this.props.center !== nextProps.center
 			|| this.props.showMarkerClusters !== nextProps.showMarkerClusters
 			|| !isEqual(this.state.currentMapStyle, nextState.currentMapStyle)
 			|| this.props.updaterKey !== nextProps.updaterKey
