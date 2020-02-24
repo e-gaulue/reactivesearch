@@ -218,17 +218,21 @@ class ReactiveMap extends Component {
 		}
 
 		if (!isEqual(this.props.center, prevProps.center)) {
-			const persistMapQuery = !!this.props.center;
-			// we need to forceExecute the query because the center has changed
-			const forceExecute = true;
+			if (this.props.mapProps.onCenterChanged) {
+				this.props.mapProps.onCenterChanged(this);
+			} else {
+				const persistMapQuery = !!this.props.center;
+				// we need to forceExecute the query because the center has changed
+				const forceExecute = true;
 
-			// we need to use getGeoDistanceQuery because new center can be outside the mappingbox
-			this.props.setMapData(
-				this.props.componentId,
-				this.getGeoDistanceQuery(this.props),
-				persistMapQuery,
-				forceExecute,
-			);
+				// we need to use getGeoDistanceQuery because new center can be outside the mappingbox
+				this.props.setMapData(
+					this.props.componentId,
+					this.getGeoDistanceQuery(this.props),
+					persistMapQuery,
+					forceExecute,
+				);
+			}
 		}
 
 		if (prevProps.defaultQuery && !isEqual(prevProps.defaultQuery(), this.defaultQuery)) {
@@ -735,18 +739,24 @@ class ReactiveMap extends Component {
 	};
 
 	handleOnIdle = () => {
-		// only make the geo_bounding query if we have hits data
-		if (this.props.hits.length && this.state.searchAsMove) {
-			// always execute geo-bounds query when center is set
-			// to improve the specificity of search results
-			const executeUpdate = !!this.props.center;
-			this.setGeoQuery(executeUpdate);
+		if (this.props.mapProps.onIdle) {
+			this.props.mapProps.onIdle(this);
+		} else {
+			// only make the geo_bounding query if we have hits data
+			// eslint-disable-next-line no-lonely-if
+			if (this.props.hits.length && this.state.searchAsMove) {
+				// always execute geo-bounds query when center is set
+				// to improve the specificity of search results
+				const executeUpdate = !!this.props.center;
+				this.setGeoQuery(executeUpdate);
+			}
 		}
-		if (this.props.mapProps.onIdle) this.props.mapProps.onIdle();
 	};
 
 	handleOnDragEnd = () => {
-		if (this.state.searchAsMove) {
+		if (this.props.mapProps.onDragEnd) {
+			this.props.mapProps.onDragEnd(this);
+		} else if (this.state.searchAsMove) {
 			this.setState(
 				{
 					preserveCenter: true,
@@ -756,28 +766,30 @@ class ReactiveMap extends Component {
 				},
 			);
 		}
-		if (this.props.mapProps.onDragEnd) this.props.mapProps.onDragEnd();
 	};
 
 	handleZoomChange = () => {
-		const zoom = (this.props.mapRef && typeof this.props.mapRef.getZoom === 'function' ? this.props.mapRef.getZoom() : false);
-		if (zoom) {
-			if (this.state.searchAsMove) {
-				this.setState(
-					{
+		if (this.props.mapProps.onZoomChanged) {
+			this.props.mapProps.onZoomChanged(this);
+		} else {
+			const zoom = (this.props.mapRef && typeof this.props.mapRef.getZoom === 'function' ? this.props.mapRef.getZoom() : false);
+			if (zoom) {
+				if (this.state.searchAsMove) {
+					this.setState(
+						{
+							zoom,
+							preserveCenter: true,
+						},
+						() => {
+							this.setGeoQuery(true);
+						},
+					);
+				} else {
+					this.setState({
 						zoom,
-						preserveCenter: true,
-					},
-					() => {
-						this.setGeoQuery(true);
-					},
-				);
-			} else {
-				this.setState({
-					zoom,
-				});
+					});
+				}
 			}
-			if (this.props.mapProps.onZoomChanged) this.props.mapProps.onZoomChanged();
 		}
 	};
 
