@@ -207,6 +207,9 @@ class ReactiveOpenStreetMap extends Component {
 						this.setState({
 							mapRef: elem.leafletElement,
 						});
+						if (this.props.onMapRefSet) {
+							this.props.onMapRefSet(elem.leafletElement);
+						}
 					}
 				}}
 				onZoomEnd={params.handleZoomChange}
@@ -260,6 +263,7 @@ ReactiveOpenStreetMap.propTypes = {
 	analytics: types.props,
 	headers: types.headers,
 	mapService: types.string,
+	onMapRefSet: types.func,
 };
 
 ReactiveOpenStreetMap.defaultProps = {

@@ -107,9 +107,14 @@ class ReactiveGoogleMap extends Component {
 					containerElement={<div style={style} />}
 					mapElement={<div style={{ height: '100%' }} />}
 					onMapMounted={(ref) => {
-						this.setState({
-							mapRef: ref,
-						});
+						if (!this.state.mapRef) {
+							this.setState({
+								mapRef: ref,
+							});
+							if (this.props.onMapRefSet) {
+								this.props.onMapRefSet(ref);
+							}
+						}
 						if (params.innerRef && ref) {
 							const map = Object.values(ref.context)[0];
 							const mapRef = { ...ref, map };
@@ -220,6 +225,7 @@ ReactiveGoogleMap.propTypes = {
 	updaterKey: types.number,
 	mapRef: types.any, // eslint-disable-line
 	mapService: types.string,
+	onMapRefSet: types.func,
 };
 
 ReactiveGoogleMap.defaultProps = {
